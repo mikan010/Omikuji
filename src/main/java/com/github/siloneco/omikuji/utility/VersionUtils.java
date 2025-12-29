@@ -12,8 +12,31 @@ import org.bukkit.inventory.InventoryView;
 
 public class VersionUtils {
 
-    private static int VERSION = Integer.parseInt((Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3] + ".")
-            .substring(3).substring(0, (Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3] + ".").substring(3).indexOf("_")));
+    private static final int VERSION = detectMinorVersion();
+
+    private static int detectMinorVersion() {
+        try {
+            // OldType: org.bukkit.craftbukkit.v1_16_R3 -> 16
+            String pkg = Bukkit.getServer().getClass().getPackage().getName();
+            String[] parts = pkg.split("\\.");
+            if (parts.length >= 4 && parts[3].startsWith("v1_")) {
+                String v = parts[3];    // v1_16_R3
+                String[] v2 = v.substring(2).split("_");
+                return Integer.parseInt(v2[0]);    // "16_R3" -> ["16", "R3"]
+            }
+        } catch (Throwable ignored) {
+        }
+
+        // NewType: Bukkit.getMinecraftVersion() = "1.21.11" -> 21
+        try {
+            String mc = Bukkit.getMinecraftVersion();
+            String[] vs = mc.split("\\.");
+            if (vs.length >= 2) {return Integer.parseInt(vs[1]);}
+        } catch (Throwable ignored) {
+        }
+
+        return 21;
+    }
 
     public static int getVersion() {
         return VERSION;

@@ -1,9 +1,21 @@
 # Omikuji
 ## 概要
 おみくじを実装するPluginです。  
-動作期待バージョン: 1.8 - 1.19.4  
-動作確認済みバージョン: 1.8.8, 1.12.2, 1.16.4, 1.17.1, 1.18.1, 1.19.4  
-ダウンロードは[こちら](https://github.com/siloneco/Omikuji/releases/latest)
+動作期待バージョン: 1.21.11
+動作確認済みバージョン: 1.21.11
+ダウンロードは[こちら](https://github.com/mikan010/Omikuji/releases/latest)
+
+## Fork / Upstream（重要）
+本リポジトリは **siloneco** 氏によるプロジェクトを元にした **fork（派生版）** です。  
+- Upstream（元）: [Omikuji](https://github.com/siloneco/Omikuji)
+- Original author: [siloneco](https://github.com/siloneco)
+- Maintainer (this fork): [mikan010](https://github.com/mikan010)
+- 注意: 本リポジトリは upstream の公式版ではありません（非公式の派生版です）
+
+## Changes（このforkでの変更点）
+upstream からの主な変更点:
+- 対応バージョンの更新
+
 ## 機能
 * おみくじが引ける
 * 結果を自由に編集できる
@@ -48,5 +60,6 @@
 ## ライセンス (License)
 [GNU General Public License v3.0](LICENSE)
 
-## 製作者
-* [siloneco](https://github.com/siloneco)
+## クレジット (Credits)
+- Original author: [siloneco](https://github.com/siloneco)
+- Maintainer (this fork): [mikan010](https://github.com/mikan010)
