@@ -4,8 +4,11 @@ import com.github.siloneco.omikuji.utility.Chat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -15,7 +18,24 @@ public class WinningInventoryContainer {
     private final List<String> alreadyUsedIDs = new ArrayList<>();
     private final HashMap<String, String> publicToSecretIdMap = new HashMap<>();
 
+    private final HashMap<String, WinningsMeta> metaMap = new HashMap<>();
+
+    public record WinningsMeta(
+            String publicId,
+            String secretId,
+            UUID drawerUuid,
+            String drawerName,
+            String resultId,
+            String resultTitle,
+            List<ItemStack> itemsSnapshot,
+            long createdAtMillis
+    ) {}
+
     public OmikujiWinningInventoryID createInventoryWithID(OmikujiResult result) {
+        return createInventoryWithID(result, null);
+    }
+
+    public OmikujiWinningInventoryID createInventoryWithID(OmikujiResult result, Player drawer) {
         if (result.getItems().isEmpty()) {
             return null;
         }
@@ -32,6 +52,22 @@ public class WinningInventoryContainer {
         invMap.put(id.getSecretID(), inv);
         publicToSecretIdMap.put(id.getPublicID(), id.getSecretID());
 
+        List<ItemStack> snapshot = result.getItems().stream()
+                .filter(Objects::nonNull)
+                .map(ItemStack::clone)
+                .toList();
+
+        metaMap.put(id.getSecretID(), new WinningsMeta(
+                id.getPublicID(),
+                id.getSecretID(),
+                drawer != null ? drawer.getUniqueId() : null,
+                drawer != null ? drawer.getName() : null,
+                result.getId(),
+                result.getDisplayTitle(),
+                snapshot,
+                System.currentTimeMillis()
+        ));
+
         return id;
     }
 
@@ -39,8 +75,17 @@ public class WinningInventoryContainer {
         return invMap.getOrDefault(secretId, null);
     }
 
-    public void disposeInventory(String id) {
-        invMap.remove(id);
+    public WinningsMeta getMeta(String secretId) {
+        return metaMap.getOrDefault(secretId, null);
+    }
+
+    public void disposeInventory(String secretId) {
+        invMap.remove(secretId);
+
+        WinningsMeta meta = metaMap.remove(secretId);
+        if (meta != null) {
+            publicToSecretIdMap.remove(meta.publicId());
+        }
     }
 
     public String getSecretID(String publicID) {

@@ -7,6 +7,7 @@ import com.github.siloneco.omikuji.listener.ResultItemViewListener;
 import com.github.siloneco.omikuji.listener.SignListener;
 import com.github.siloneco.omikuji.listener.WinningInventoryDisposeListener;
 import com.github.siloneco.omikuji.utility.Chat;
+import com.github.siloneco.omikuji.utility.ItemStackLog;
 import com.github.siloneco.omikuji.utility.MessageBridge;
 import com.github.siloneco.omikuji.utility.VersionUtils;
 import java.security.NoSuchAlgorithmException;
@@ -14,10 +15,12 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 import lombok.Getter;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -140,46 +143,95 @@ public class Omikuji extends JavaPlugin {
         }
 
         Bukkit.getScheduler().runTaskLater(this, () -> {
-            executingPlayers.remove(p.getUniqueId());
-
-            if (!p.isOnline()) {
-                counter.subtractCount(p);
-
-                if (paid) {
-                    EconomyResponse res = econ.depositPlayer(p, cost);
-                    if (!res.transactionSuccess()) {
-                        getLogger().warning(Chat.f("{0} への {1} の払い戻しに失敗しました。", p.getName(), econ.format(cost)));
-                    }
-                }
-                return;
-            }
-            OmikujiResult result;
             try {
-                result = pluginConfig.getResultContainer().execute();
-            } catch (NoSuchAlgorithmException e) {
-                getLogger().warning("SecureRandomでの乱数生成に失敗しました。Plugin開発者に連絡してください。");
-                p.sendMessage(Chat.f("{0} &cおみくじの結果を取得できませんでした。管理者に連絡してください。", pluginConfig.getPrefix()));
-                return;
+                executingPlayers.remove(p.getUniqueId());
+
+                if (!p.isOnline()) {
+                    counter.subtractCount(p);
+
+                    if (paid) {
+                        EconomyResponse res = econ.depositPlayer(p, cost);
+                        if (!res.transactionSuccess()) {
+                            getLogger().warning(Chat.f("{0} への {1} の払い戻しに失敗しました。", p.getName(), econ.format(cost)));
+                        }
+                    }
+                    return;
+                }
+
+                if (pluginConfig.getResultContainer() == null) {
+                    getLogger().warning("ResultContainer が null です。config.yml の読み込みに失敗している可能性があります。");
+                    p.sendMessage(Chat.f("{0} &cおみくじの結果を取得できませんでした。管理者に連絡してください。", pluginConfig.getPrefix()));
+                    return;
+                }
+
+                OmikujiResult result;
+                try {
+                    result = pluginConfig.getResultContainer().execute();
+                } catch (NoSuchAlgorithmException e) {
+                    getLogger().warning("SecureRandomでの乱数生成に失敗しました。Plugin開発者に連絡してください。");
+                    p.sendMessage(Chat.f("{0} &cおみくじの結果を取得できませんでした。管理者に連絡してください。", pluginConfig.getPrefix()));
+                    return;
+                }
+
+                if (result == null) {
+                    getLogger().warning("おみくじの結果の抽選に失敗しました。(ResultContainer returned null)");
+                    p.sendMessage(Chat.f("{0} &cおみくじの結果を取得できませんでした。管理者に連絡してください。", pluginConfig.getPrefix()));
+                    return;
+                }
+
+                if (pluginConfig.isConsoleLogEnabled()) {
+                    String titleForLog = ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', result.getDisplayTitle()));
+                    getLogger().info(String.format(
+                            "[DRAW] player=%s uuid=%s resultId=%s title=%s items=%s",
+                            p.getName(),
+                            p.getUniqueId(),
+                            result.getId(),
+                            titleForLog,
+                            ItemStackLog.summarize(result.getItems())
+                    ));
+                }
+
+                if (getPluginConfig().getResultTitle() != null) {
+                    VersionUtils.sendTitle(
+                            getPluginConfig().getResultTitle()
+                                    .replace("%RESULT%", result.getDisplayTitle())
+                                    .replace("%PREFIX%", pluginConfig.getPrefix()),
+                            0, 100, 20, p
+                    );
+                }
+
+                if (getPluginConfig().getResultChat() != null) {
+                    p.sendMessage(
+                            getPluginConfig().getResultChat()
+                                    .replace("%RESULT%", result.getDisplayTitle())
+                                    .replace("%PREFIX%", pluginConfig.getPrefix())
+                    );
+                }
+
+                VersionUtils.playLevelUpSound(p);
+
+                if (result.getItems().isEmpty()) {
+                    return;
+                }
+
+                OmikujiWinningInventoryID id = winningInventoryContainer.createInventoryWithID(result, p);
+                if (id == null) {
+                    return;
+                }
+                String secretID = id.getSecretID();
+                MessageBridge.create()
+                        .bar().newline()
+                        .then(Chat.f("{0} ", pluginConfig.getPrefix()))
+                        .then(Chat.f("&e&nここをクリック")).runCommand("/omikuji openWinningInventory " + secretID)
+                        .then(Chat.f("&aでアイテムをゲット！")).newline()
+                        .bar()
+                        .send(p);
+            } catch (Throwable t) {
+                getLogger().log(Level.SEVERE, "おみくじ処理中に例外が発生しました。", t);
+                if (p.isOnline()) {
+                    p.sendMessage(Chat.f("{0} &cおみくじ処理中にエラーが発生しました。管理者に連絡してください。", pluginConfig.getPrefix()));
+                }
             }
-
-            VersionUtils.sendTitle(getPluginConfig().getResultTitle().replace("%RESULT%", result.getDisplayTitle()).replace("%PREFIX%", pluginConfig.getPrefix()), 0, 100, 20, p);
-
-            p.sendMessage(getPluginConfig().getResultChat().replace("%RESULT%", result.getDisplayTitle()).replace("%PREFIX%", pluginConfig.getPrefix()));
-
-            VersionUtils.playLevelUpSound(p);
-
-            if (result.getItems().isEmpty()) {
-                return;
-            }
-
-            String secretID = winningInventoryContainer.createInventoryWithID(result).getSecretID();
-            MessageBridge.create()
-                    .bar().newline()
-                    .then(Chat.f("{0} ", pluginConfig.getPrefix()))
-                    .then(Chat.f("&e&nここをクリック")).runCommand("/omikuji openWinningInventory " + secretID)
-                    .then(Chat.f("&aでアイテムをゲット！")).newline()
-                    .bar()
-                    .send(p);
         }, pluginConfig.getDrawTicks());
 
     }

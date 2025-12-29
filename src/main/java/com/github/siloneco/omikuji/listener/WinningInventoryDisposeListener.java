@@ -1,9 +1,12 @@
 package com.github.siloneco.omikuji.listener;
 
 import com.github.siloneco.omikuji.Omikuji;
+import com.github.siloneco.omikuji.WinningInventoryContainer;
 import com.github.siloneco.omikuji.utility.Chat;
+import com.github.siloneco.omikuji.utility.ItemStackLog;
 import com.github.siloneco.omikuji.utility.VersionUtils;
 import lombok.RequiredArgsConstructor;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -49,6 +52,32 @@ public class WinningInventoryDisposeListener implements Listener {
         if (secretID == null) {
             return;
         }
+
+        if (plugin.getPluginConfig().isConsoleLogEnabled()) {
+            WinningInventoryContainer.WinningsMeta meta = plugin.getWinningInventoryContainer().getMeta(secretID);
+            if (meta != null) {
+                String titleForLog = ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', meta.resultTitle()));
+                plugin.getLogger().info(String.format(
+                        "[CLAIM] claimer=%s uuid=%s drawer=%s drawerUuid=%s resultId=%s title=%s items=%s",
+                        p.getName(),
+                        p.getUniqueId(),
+                        meta.drawerName(),
+                        meta.drawerUuid(),
+                        meta.resultId(),
+                        titleForLog,
+                        ItemStackLog.summarize(meta.itemsSnapshot())
+                ));
+            } else {
+                plugin.getLogger().info(String.format(
+                        "[CLAIM] claimer=%s uuid=%s publicId=%s secretId=%s meta=missing",
+                        p.getName(),
+                        p.getUniqueId(),
+                        publicID,
+                        secretID
+                ));
+            }
+        }
+
         plugin.getWinningInventoryContainer().disposeInventory(secretID);
     }
 }
