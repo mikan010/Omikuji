@@ -36,9 +36,9 @@ public class SignListener implements Listener {
             e.setLine(1, ChatColor.translateAlternateColorCodes('&', e.getLine(1)));
             e.setLine(2, ChatColor.translateAlternateColorCodes('&', e.getLine(2)));
             e.setLine(3, ChatColor.translateAlternateColorCodes('&', e.getLine(3)));
+            p.sendMessage(Chat.f("{0} &a看板を設置しました！", plugin.getPluginConfig().getPrefix()));
         }
 
-        p.sendMessage(Chat.f("{0} &a看板を設置しました！", plugin.getPluginConfig().getPrefix()));
     }
 
     @EventHandler
@@ -62,6 +62,13 @@ public class SignListener implements Listener {
         if (!plugin.getPluginConfig().getSignPrefix().equalsIgnoreCase(sign.getLine(0))) {
             return;
         }
+
+        e.setCancelled(true);
+        e.setUseInteractedBlock(org.bukkit.event.Event.Result.DENY);
+        e.setUseItemInHand(org.bukkit.event.Event.Result.DENY);
+
+        lastExecuted.put(p.getUniqueId(), System.currentTimeMillis());
+        plugin.execute(p);
 
         if (!p.hasPermission("omikuji.allowdraw")) {
             p.sendMessage(Chat.f("{0} &c権限がありません！", plugin.getPluginConfig().getPrefix()));

@@ -36,6 +36,8 @@ public class OmikujiConfig {
     private boolean allowCommand;
     private boolean allowSign;
 
+    private boolean consoleLogEnabled;
+
     private String signPrefix;
     private long signIntervalMilliseconds;
 
@@ -65,6 +67,8 @@ public class OmikujiConfig {
         allowCommand = conf.getBoolean("Methods.Command", false);
         allowSign = conf.getBoolean("Methods.Sign", false);
 
+        consoleLogEnabled = conf.getBoolean("Logging.Console.Enabled", true);
+
         signPrefix = ChatColor.translateAlternateColorCodes('&', conf.getString("Sign.Prefix", ""));
         signIntervalMilliseconds = conf.getLong("Sign.IntervalMilliseconds", 1000L);
 
@@ -87,7 +91,7 @@ public class OmikujiConfig {
                 autoEnable.setTime(date);
             } catch (ParseException e) {
                 plugin.getLogger().warning("AutoEnable の読み込みに失敗しました。不正なフォーマットです。");
-                return;
+                autoEnable = null;
             }
         }
         if (conf.getBoolean("AutoDisable.Enable", false)) {
@@ -98,11 +102,17 @@ public class OmikujiConfig {
                 autoDisable.setTime(date);
             } catch (ParseException e) {
                 plugin.getLogger().warning("AutoDisable の読み込みに失敗しました。不正なフォーマットです。");
-                return;
+                autoDisable = null;
             }
         }
 
         HashMap<Double, OmikujiResult> results = new HashMap<>();
+
+        if (conf.getConfigurationSection("Results") == null) {
+            plugin.getLogger().warning("Results が設定されていません。不正な設定のため、おみくじ機能を無効化します。");
+            resultContainer = new ResultContainer(results);
+            return;
+        }
 
         double currentPercentage = 0;
         int priority = 0; // 数が低い方が優先度が高い

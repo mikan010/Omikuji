@@ -26,6 +26,12 @@ Methods:
   Command: true
   Sign: true
 
+# ログ出力設定
+# Console.Enabled: true にすると、おみくじの結果(DRAW)と受け取り完了(CLAIM)をサーバーコンソールに出力します
+Logging:
+  Console:
+    Enabled: true
+
 # 看板でおみくじを引ける状態にする場合の設定をします
 # Prefix: 看板の先頭に書かれるメッセージです。 !!注意!!: この設定を変更した場合、すでに設定してある看板は再設置しなければなりません！
 # IntervalMilliseconds: 看板の連打防止用設定です。最後にクリックしてからこの秒数の間は連打できなくなります。ミリ秒で指定してください
