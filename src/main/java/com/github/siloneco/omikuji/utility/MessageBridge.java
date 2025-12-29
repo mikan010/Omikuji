@@ -57,7 +57,11 @@ public class MessageBridge {
     if (jsonMessage != null) {
       jsonMessage = jsonMessage.color(color);
     } else {
-      textComponents.getLast().setColor(net.md_5.bungee.api.ChatColor.of(color.name()));
+      try {
+        textComponents.getLast().setColor(net.md_5.bungee.api.ChatColor.valueOf(color.name()));
+      } catch (IllegalArgumentException e) {
+        textComponents.getLast().setColor(net.md_5.bungee.api.ChatColor.WHITE);
+      }
     }
     return this;
   }
