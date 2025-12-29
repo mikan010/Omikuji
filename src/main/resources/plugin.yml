@@ -1,7 +1,7 @@
 name: ${project.name}
 main: com.github.siloneco.omikuji.Omikuji
 version: ${project.version}
-author: siloneco
+author: mikan010
 description: ${project.description}
 softdepend: [ "Vault" ]
 api-version: 1.21

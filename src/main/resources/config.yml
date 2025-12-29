@@ -1,5 +1,6 @@
 # Omikuji Plugin
-# Author: siloneco
+# Original author: siloneco 
+# Maintainer: mikan010
 
 # チャットの先頭に表示されるメッセージです
 Prefix: "&e[&cおみくじ&e]"
