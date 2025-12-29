@@ -219,10 +219,13 @@ public class Omikuji extends JavaPlugin {
                     return;
                 }
                 String secretID = id.getSecretID();
+                String claimCommand = "/omikuji openWinningInventory " + secretID;
+                
                 MessageBridge.create()
                         .bar().newline()
                         .then(Chat.f("{0} ", pluginConfig.getPrefix()))
-                        .then(Chat.f("&e&nここをクリック")).runCommand("/omikuji openWinningInventory " + secretID)
+                        .then(Chat.f("&e&nここをクリック")).runCommand(claimCommand).newline()
+                        .then(Chat.f("&eもしくは次のコマンドを実行: &3&o{0}", claimCommand)).newline()
                         .then(Chat.f("&aでアイテムをゲット！")).newline()
                         .bar()
                         .send(p);
