@@ -4,7 +4,7 @@
 
     <groupId>com.github.mikan010</groupId>
     <artifactId>Omikuji</artifactId>
-    <version>1.0.5-forked-0.1.6-SNAPSHOT</version>
+    <version>1.0.5-forked-0.1.6</version>
 
     <name>${project.artifactId}</name>
     <description>Omikuji plugin</description>
