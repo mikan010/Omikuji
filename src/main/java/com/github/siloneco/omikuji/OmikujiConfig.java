@@ -48,6 +48,7 @@ public class OmikujiConfig {
     private String resultTitle;
     private String resultChat;
 
+
     public void load() {
         File file = new File(plugin.getDataFolder(), "config.yml");
         Reader reader;
@@ -75,6 +76,7 @@ public class OmikujiConfig {
         joinMessage = conf.getString("Chats.JoinMessage", null);
         resultTitle = conf.getString("Chats.ResultTitle", null);
         resultChat = conf.getString("Chats.ResultChat", null);
+
         if (joinMessage != null)
             joinMessage = Chat.f(joinMessage);
         if (resultTitle != null)
