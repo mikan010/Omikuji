@@ -181,11 +181,12 @@ public class OmikujiCommand implements CommandExecutor {
     }
 
     private void sendConsoleHelpMessage(CommandSender sender, String label) {
-        String msg = Chat.f("&a/{0} help &7- &bこのメッセージを表示\n") +
-                Chat.f("&a/{0} info &7- &bおみくじの結果の設定を表示\n") +
+        String msg = Chat.f("&a/{0} help &7- &bこのメッセージを表示\n", label) +
+                Chat.f("&a/{0} reload &7- &bConfigをリロード\n", label) +
+                Chat.f("&a/{0} info &7- &bおみくじの結果の設定を表示\n", label) +
                 Chat.f("======== 以下プレイヤーのみ ========\n") +
-                Chat.f("&a/{0} viewItem <ID> &7- &b貰えるアイテムを表示\n") +
-                Chat.f("&a/{0} setItem <ID> &7- &b貰えるアイテムを編集\n");
+                Chat.f("&a/{0} viewItem <ID> &7- &b貰えるアイテムを表示\n", label) +
+                Chat.f("&a/{0} setItem <ID> &7- &b貰えるアイテムを編集\n", label);
         sender.sendMessage(msg);
     }
 }
