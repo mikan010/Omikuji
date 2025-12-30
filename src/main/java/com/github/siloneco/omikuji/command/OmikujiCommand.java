@@ -94,13 +94,19 @@ public class OmikujiCommand implements CommandExecutor {
                 }
                 msg.bar().send((Player) sender);
             } else {
-                StringBuilder msg = new StringBuilder("===========================\n");
+                String name = Chat.r(plugin.getDescription().getName());
+                String prefix = "[" + name + "] ";
+                sender.sendMessage(prefix + "===========================");
                 for (OmikujiResult result : results) {
-                    msg.append(Chat.f("{0}&7({1}) &a{2}% &7- {3}アイテム\n", result.getDisplayTitle(), result.getId(), result.getPercentage(), result.getItems().size()));
+                    String msg = (Chat.f(prefix + "{0}&7({1}) &a{2}% &7- {3}アイテム",
+                        result.getDisplayTitle(),
+                        result.getId(),
+                        result.getPercentage(),
+                        result.getItems().size()
+                    ));
+                    sender.sendMessage(msg);
                 }
-                msg.append("===========================");
-
-                sender.sendMessage(msg.toString());
+                sender.sendMessage(prefix + "===========================");
             }
 
         } else if (Args.check(args, 0, "viewItem", "viewItems")) {
@@ -169,8 +175,12 @@ public class OmikujiCommand implements CommandExecutor {
     }
 
     private void sendPlayerHelpMessage(Player p, String label) {
+        String name = plugin.getDescription().getName();
+        String version = plugin.getDescription().getVersion();
         MessageBridge.create()
                 .bar().newline()
+                .then(Chat.f("&a{0} version: {1}", name, version)).newline()
+                .newline()
                 .then(Chat.f("&a/{0} help &7- &bこのメッセージを表示", label)).newline()
                 .then(Chat.f("&a/{0} reload &7- &bConfigをリロード", label)).newline()
                 .then(Chat.f("&a/{0} info &7- &bおみくじの結果の設定を表示", label)).newline()
@@ -181,11 +191,16 @@ public class OmikujiCommand implements CommandExecutor {
     }
 
     private void sendConsoleHelpMessage(CommandSender sender, String label) {
-        String msg = Chat.f("&a/{0} help &7- &bこのメッセージを表示\n") +
-                Chat.f("&a/{0} info &7- &bおみくじの結果の設定を表示\n") +
-                Chat.f("======== 以下プレイヤーのみ ========\n") +
-                Chat.f("&a/{0} viewItem <ID> &7- &b貰えるアイテムを表示\n") +
-                Chat.f("&a/{0} setItem <ID> &7- &b貰えるアイテムを編集\n");
-        sender.sendMessage(msg);
+        String name = plugin.getDescription().getName();
+        String prefix = "[" + name + "] ";
+        String version = plugin.getDescription().getVersion();
+
+        sender.sendMessage(prefix + name + " version: " + version);
+        sender.sendMessage(prefix + "/" + label + " help - このメッセージを表示");
+        sender.sendMessage(prefix + "/" + label + " reload - Configをリロード");
+        sender.sendMessage(prefix + "/" + label + " info - おみくじの結果の設定を表示");
+        sender.sendMessage(prefix + " ======== 以下プレイヤーのみ =========");
+        sender.sendMessage(prefix + "/" + label + " viewItem <ID> - 貰えるアイテムを表示");
+        sender.sendMessage(prefix + "/" + label + " setItem <ID> - 貰えるアイテムを編集");
     }
 }
